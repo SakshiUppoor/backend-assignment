@@ -7,33 +7,40 @@ A REST API that continuously fetches latest chess-related Youtube videos and sav
 ## Installation
 
 - Clone the repository
-    
-    git clone https://github.com/SakshiUppoor/chess-youtube.git
-    
+```    
+git clone https://github.com/SakshiUppoor/chess-youtube.git
+```
+
 - Add your Youtube API key(s) to `YOUTUBE_API_KEYS` in [chessYoutube/credentials.json](https://github.com/SakshiUppoor/chess-youtube/blob/master/chessYoutube/credentials.json)
 ```
-    "YOUTUBE_API_KEYS": [
-        "PASTE_YOUR_API_KEY1_HERE",
-        "PASTE_YOUR_API_KEY2_HERE"
-    ]
+"YOUTUBE_API_KEYS": [
+    "PASTE_YOUR_API_KEY1_HERE",
+    "PASTE_YOUR_API_KEY2_HERE"
+]
 ```
 
 - Create a virtual environment and activate it _(Optional but recommended)_
-
-    virtualenv venv
-    cd Scripts
-    activate
+```
+virtualenv venv
+cd Scripts
+activate
+```    
 
 - Navigate back to the main folder. Installing dependencies
-
-    pip install -r requirements.txt
+```
+pip install -r requirements.txt
+```
 
 - Make migrations
-    python manage.gy makemigrations
-    python manage.py migrate
+```
+python manage.gy makemigrations
+python manage.py migrate
+```
 
 - Start the server
-    python manage.py runserver
+```             
+python manage.py runserver
+```
 
 The server should be live at http://127.0.0.1:8000/ :rocket:
 
@@ -41,8 +48,8 @@ The server should be live at http://127.0.0.1:8000/ :rocket:
 
 #### List of videos
 
-```http
-  GET /api/list
+```
+GET /api/list
 ```
 
 | Parameter | Type     | Description                |
@@ -54,8 +61,8 @@ Returns a paginated list of saved Youtube videos in a reverse chronological orde
 
 #### Dashboard
 
-```http
-  GET /dashboard
+```
+GET /dashboard
 ```
 Displays a basic dashboard which utilizes the above REST API endpoint.
 
