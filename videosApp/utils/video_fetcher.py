@@ -8,15 +8,18 @@ import json
 
 scheduler = BackgroundScheduler()
 
-# Fetching youtube API Key
-with open('./chessYoutube/credentials.json', 'r') as f:
-    YOUTUBE_API_KEY = json.load(f)["YOUTUBE_API_KEY"]
-
-# Building the youtube API service
-youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
+youtube, YOUTUBE_API_KEYS, i = (None, None, None)
 
 def start():
+    global youtube, YOUTUBE_API_KEYS, i
     print("Job added")
+    # Fetching youtube API Key
+    with open('./chessYoutube/credentials.json', 'r') as f:
+        YOUTUBE_API_KEYS = json.load(f)["YOUTUBE_API_KEYS"]
+
+    i=0
+    # Building the youtube API service
+    youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEYS[i])
     scheduler.add_job(fetchLatestVideos, 'interval', seconds=25)
     scheduler.start()
     atexit.register(terminate)
@@ -32,22 +35,36 @@ def fetchLatestVideos():
     using the Yotube Data API
     and stores them in the database
     """
-    
-    # Timestamp of 1 hour before
-    an_hour_ago = (datetime.utcnow() - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    global youtube, YOUTUBE_API_KEYS, i
+    try:
+        # Timestamp of 1 hour before
+        an_hour_ago = (datetime.utcnow() - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    request = youtube.search().list(
-        part='snippet',
-        type='video',
-        q='chess', # Get chess videos
-        order='date', # Order in reverse chronological order
-        maxResults=10, # Fetch max 10 videos at a time
-        publishedAfter=an_hour_ago # Fetch videos posted not more than an hour ago
-    )
+        request = youtube.search().list(
+            part='snippet',
+            type='video',
+            q='chess', # Get chess videos
+            order='date', # Order in reverse chronological order
+            maxResults=10, # Fetch max 10 videos at a time
+            publishedAfter=an_hour_ago # Fetch videos posted not more than an hour ago
+        )
+        response = request.execute()
+        videos = storeVideos(response["items"])
+        print(f"Fetched & saved {len(videos)}.")
 
-    response = request.execute()
-    videos = storeVideos(response["items"])
-    print(f"Fetched & saved {len(videos)}.")
+    except Exception as e:
+        if e.resp.status in [403, 429]:
+            """
+            If quota is exceeded, change API key
+            to next available API key
+            403 - Quota Exceeded
+            429 - User rate limited
+            """
+            youtube.close()
+            i += 1
+            i = i%len(YOUTUBE_API_KEYS)
+            print("Quota exceeded on current key...Using next available key")
+            youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEYS[i])
 
 def storeVideos(videos):
     saved_videos = []
