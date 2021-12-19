@@ -1,8 +1,12 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 from googleapiclient.discovery import build
 from django.db import IntegrityError
 from datetime import datetime, timedelta
 from ..models import Video
 import json
+
+scheduler = BackgroundScheduler()
 
 # Fetching youtube API Key
 with open('./chessYoutube/credentials.json', 'r') as f:
@@ -11,10 +15,22 @@ with open('./chessYoutube/credentials.json', 'r') as f:
 # Building the youtube API service
 youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
 
+def start():
+    print("Job added")
+    scheduler.add_job(fetchLatestVideos, 'interval', seconds=25)
+    scheduler.start()
+    atexit.register(terminate)
+    
+def terminate():
+    print("Killing job")
+    scheduler.shutdown()
+
 def fetchLatestVideos():
     """
-    Fetches and stores the latest 10 
-    chess videos published an hour ago
+    Fetches the latest 10 chess 
+    videos published an hour ago
+    using the Yotube Data API
+    and stores them in the database
     """
     
     # Timestamp of 1 hour before
@@ -31,7 +47,7 @@ def fetchLatestVideos():
 
     response = request.execute()
     videos = storeVideos(response["items"])
-    return {"videos":videos}
+    print(f"Fetched & saved {len(videos)}.")
 
 def storeVideos(videos):
     saved_videos = []
