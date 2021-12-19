@@ -8,7 +8,7 @@ A REST API that continuously fetches latest chess-related Youtube videos and sav
 
 - Clone the repository
 ```    
-git clone https://github.com/SakshiUppoor/chess-youtube.git
+git clone https://github.com/SakshiUppoor/backend-assignment.git
 ```
 
 - Add your Youtube API key(s) to `YOUTUBE_API_KEYS` in [chessYoutube/credentials.json](https://github.com/SakshiUppoor/chess-youtube/blob/master/chessYoutube/credentials.json)
