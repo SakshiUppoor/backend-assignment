@@ -24,15 +24,21 @@
     <input type="text" id="myInput" onkeyup="searchVideos()" class="mx-auto" placeholder="Search for videos..">
     <div id="card-container" class="container">
     </div>
+    <button class="btn btn-primary mx-auto" style="display: block" onclick="loadVideos()">Load More</button>
 </body>
 <script>
-    fetch(window.location.origin)
+   var page = 1;
+  var size = 10;
+  function loadVideos() {
+    fetch(window.location.origin+`/api/list?page=${page}&size=${size}`)
     .then(data => {
         return data.json();
     })
     .then(videos => {
         displayVideos(videos.results);
+        page += 1;
     })
+  }
     function displayVideos(videos) {
         console.log(videos)
         var ul = document.getElementById("card-container");
@@ -55,6 +61,8 @@
             ul.appendChild(div); 
         });
     }
+    
+    loadVideos();
     </script>
     
 </html>
